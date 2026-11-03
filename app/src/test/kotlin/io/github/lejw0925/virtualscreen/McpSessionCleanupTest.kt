@@ -90,18 +90,18 @@ class McpSessionCleanupTest {
         }
     }
 
-    @Test fun currentControllerSurvivesUntilItsLeaseExpiresWithoutClosingTheDisplay() {
+    @Test fun idleControllerSessionExpiresAndReleasesLeaseWithoutClosingTheDisplay() {
         TestServer(leaseMillis = 600_000).use { test ->
             val client = test.initialize()
             val lease = test.tool(client, "acquire_control", JSONObject())
                 .body!!.getJSONObject("result").getJSONObject("structuredContent").getString("lease_token")
             val created = test.tool(client, "create_screen", JSONObject().put("lease_token", lease))
             assertTrue(created.body!!.getJSONObject("result").getJSONObject("structuredContent").getBoolean("ok"))
-            test.clock.set(300_000)
+            test.clock.set(299_999)
             test.server.recycleIdleSessions()
             assertEquals(1, test.server.state().sessionCount)
             assertEquals(client, test.sessions.leaseStatus()?.owner)
-            test.clock.set(600_000)
+            test.clock.set(300_000)
             test.server.recycleIdleSessions()
             assertEquals(0, test.server.state().sessionCount)
             assertNull(test.sessions.leaseStatus())
