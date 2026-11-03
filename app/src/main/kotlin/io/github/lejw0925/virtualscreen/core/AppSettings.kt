@@ -9,15 +9,15 @@ import io.github.lejw0925.virtualscreen.backend.VirtualScreenConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-data class UserSettings(val backend: BackendKind = BackendKind.ROOT,val config: VirtualScreenConfig = VirtualScreenConfig(),val theme: String = "MonetSystem",val language: String = "system",val restoreApp: Boolean = true,val lastComponent: String = "",val lan: Boolean = false,val fitViewer: Boolean = true,val matchHostDensity: Boolean = true,val pipEnabled: Boolean = true,val autoApproveRestart: Boolean = false)
+data class UserSettings(val backend: BackendKind = BackendKind.ROOT,val config: VirtualScreenConfig = if (io.github.lejw0925.virtualscreen.BuildConfig.GODOT_LAB) VirtualScreenConfig(width=2289,height=1080,density=320,rotation=1) else VirtualScreenConfig(),val theme: String = "MonetSystem",val language: String = "system",val restoreApp: Boolean = true,val lastComponent: String = "",val lan: Boolean = false,val fitViewer: Boolean = true,val matchHostDensity: Boolean = true,val pipEnabled: Boolean = true,val autoApproveRestart: Boolean = false)
 class AppSettings(private val context: Context) {
     private val prefs = context.getSharedPreferences("user_settings",Context.MODE_PRIVATE)
     private val mutable = MutableStateFlow(runCatching { UserSettings(BackendKind.valueOf(prefs.getString("backend","ROOT")!!),
-        VirtualScreenConfig(prefs.getInt("width",720),prefs.getInt("height",1600),prefs.getInt("density",320),prefs.getInt("rotation",0),prefs.getBoolean("off",false),prefs.getInt("idle",20)),
-        prefs.getString("theme","MonetSystem")!!,prefs.getString("language","system")!!,prefs.getBoolean("restore",true),prefs.getString("last","")!!,prefs.getBoolean("lan",false),prefs.getBoolean("fitViewer",true),prefs.getBoolean("matchHostDensity",true),
+        VirtualScreenConfig(prefs.getInt("width",if (io.github.lejw0925.virtualscreen.BuildConfig.GODOT_LAB) 2289 else 720),prefs.getInt("height",if (io.github.lejw0925.virtualscreen.BuildConfig.GODOT_LAB) 1080 else 1600),prefs.getInt("density",320),prefs.getInt("rotation",if (io.github.lejw0925.virtualscreen.BuildConfig.GODOT_LAB) 1 else 0),prefs.getBoolean("off",false),prefs.getInt("idle",20)),
+        prefs.getString("theme","MonetSystem")!!,prefs.getString("language","system")!!,prefs.getBoolean("restore",true),prefs.getString("last","")!!,prefs.getBoolean("lan",false),prefs.getBoolean("fitViewer",!io.github.lejw0925.virtualscreen.BuildConfig.GODOT_LAB),prefs.getBoolean("matchHostDensity",!io.github.lejw0925.virtualscreen.BuildConfig.GODOT_LAB),
         prefs.getBoolean("pipEnabled",true),prefs.getBoolean("autoApproveRestart",false)) }.getOrDefault(UserSettings()))
     val flow = mutable.asStateFlow()
-    private val guideState = MutableStateFlow(prefs.getBoolean("guideCompleted",false))
+    private val guideState = MutableStateFlow(io.github.lejw0925.virtualscreen.BuildConfig.GODOT_LAB || prefs.getBoolean("guideCompleted",false))
     val guideCompleted = guideState.asStateFlow()
     fun completeGuide() { prefs.edit().putBoolean("guideCompleted",true).apply(); guideState.value=true }
     val mcpBackgroundNoticeAcknowledged: Boolean

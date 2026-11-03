@@ -13,7 +13,19 @@ android {
     namespace = "io.github.lejw0925.virtualscreen"
     compileSdk = 37
 
+    flavorDimensions += "edition"
+    productFlavors {
+        create("standard") { dimension = "edition" }
+        create("lab") {
+            dimension = "edition"
+            applicationIdSuffix = ".lab"
+            versionNameSuffix = "-lab"
+            buildConfigField("boolean", "GODOT_LAB", "true")
+        }
+    }
+
     defaultConfig {
+        buildConfigField("boolean", "GODOT_LAB", "false")
         applicationId = "io.github.lejw0925.virtualscreen"
         minSdk = 33
         targetSdk = 37

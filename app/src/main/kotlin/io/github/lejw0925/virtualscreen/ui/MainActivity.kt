@@ -128,7 +128,7 @@ open class MainActivity : ComponentActivity() {
                 }
             } else if(launchingPreview && !pip) Box(Modifier.fillMaxSize().background(Color.Transparent)) {
                 WindowAppearance(Color.Transparent)
-            } else if(!guideDone && this !is ViewerActivity && !pip) Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
+            } else if(!BuildConfig.GODOT_LAB && !guideDone && this !is ViewerActivity && !pip) Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
                 WindowAppearance(MaterialTheme.colorScheme.background)
                 SetupGuide(app,{ notifications.launch(Manifest.permission.POST_NOTIFICATIONS) }) {}
             } else ViewerScreen(app,pip,{ notifications.launch(Manifest.permission.POST_NOTIFICATIONS) },{ enterPreviewPictureInPicture() },{ openSettings() },{ openSettings("MCP") },{ openSettings("BACKEND") },{ openSettings("LOGS") })
@@ -335,7 +335,7 @@ internal suspend fun phoneInput(app: VirtualScreenApplication,operation: Backend
         withContext(Dispatchers.IO) {
             app.awaitShutdown()
             if(app.sessions.state.value.displayId==null) {
-                if(!app.settings.backendConfigured) {
+                if(!BuildConfig.GODOT_LAB && !app.settings.backendConfigured) {
                     val shizuku=app.sessions.selectBackend(BackendKind.SHIZUKU)
                     if(shizuku.displayCreation != CapabilityStatus.REQUIRES_AUTHORIZATION) app.settings.update { it.copy(backend=BackendKind.SHIZUKU) }
                 }
