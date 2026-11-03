@@ -159,10 +159,12 @@ class McpServerController(context: Context,private val sessions: VirtualScreenSe
     /** Admission, expiration and request tracking share a lock so cleanup cannot race a live request. */
     internal fun recycleIdleSessions() = synchronized(clientLock) {
         val now = nowMillis()
-        val controller = sessions.leaseStatus()?.owner
+        // A controller is not immortal: an abandoned MCP transport must be recycled too.
+        // disconnectSession() calls sessions.disconnectClient(), which releases that client's
+        // lease. Excluding the current controller here pinned orphaned leases indefinitely.
         clients.values.filter { client ->
             val timeout = if(client.initialized) SESSION_IDLE_MILLIS else HANDSHAKE_IDLE_MILLIS
-            client.activeCalls == 0 && client.id != controller && now - client.lastActivityMillis >= timeout
+            client.activeCalls == 0 && now - client.lastActivityMillis >= timeout
         }.forEach { disconnectSession(it.id) }
     }
 
